@@ -1,0 +1,76 @@
+# ============================================
+# General-purpose .gitignore
+# (.NET / Visual Studio / VS Code / Rider)
+# ============================================
+
+# --- Visual Studio ---
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- Build output ---
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[Pp]ublish/
+out/
+artifacts/
+
+# --- Logs ---
+[Ll]og/
+[Ll]ogs/
+*.log
+
+# --- Tests and coverage ---
+TestResults/
+[Tt]est[Rr]esult*/
+coverage/
+*.coverage
+*.coveragexml
+
+# --- NuGet ---
+packages/
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+
+# --- IDEs and code tools ---
+.vscode/
+.idea/
+_ReSharper*/
+*.DotSettings
+*.DotSettings.user
+
+# --- Operating system files ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# --- Secrets and local configuration ---
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+*.secrets.json
+secrets.json
+*.pfx
+*.pem
+*.key
+
+# --- Local databases ---
+*.mdf
+*.ldf
+*.sqlite
+*.sqlite3
+*.db
+
+# --- Frontend (if the repo contains one) ---
+node_modules/
+dist/
+.next/
+.cache/
