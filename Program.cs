@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
+using System.Text.Json.Serialization;
 using TicketSistemi.Context;
 using TicketSistemi.Models;
 
@@ -13,6 +14,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 {
     string con = builder.Configuration.GetConnectionString("SqlServer")!;
     opt.UseSqlServer(con);    
+});
+builder.Services.ConfigureHttpJsonOptions(opt =>
+{
+    opt.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
 builder.Services.AddIdentityCore<ApplicationUser>(opt =>
