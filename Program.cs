@@ -7,6 +7,8 @@ using System.Text;
 using System.Text.Json.Serialization;
 using TicketSistemi.Context;
 using TicketSistemi.Models;
+using TicketSistemi.Services.Abstractions;
+using TicketSistemi.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +49,8 @@ builder.Services
         };
     });
 
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddOpenApi();
