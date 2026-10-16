@@ -1,4 +1,6 @@
-﻿namespace TicketSistemi.DTOs.Tickets
+﻿using TicketSistemi.Models.Enums;
+
+namespace TicketSistemi.DTOs.Tickets
 {
     public sealed record TicketDetailResponse(
     Guid Id,

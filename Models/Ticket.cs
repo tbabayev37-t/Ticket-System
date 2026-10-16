@@ -1,4 +1,6 @@
-﻿namespace TicketSistemi.Models
+﻿using TicketSistemi.Models.Enums;
+
+namespace TicketSistemi.Models
 {
     public sealed class Ticket
     {
