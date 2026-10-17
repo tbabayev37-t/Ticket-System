@@ -15,7 +15,10 @@ namespace TicketSistemi.Services.Implementations
         {
             var jwt = configuration.GetSection("Jwt");
             var now = DateTimeOffset.UtcNow;
-            var expiresAt = now.AddMinutes(jwt.GetValue<int>("ExpiresMinutes"));
+            var expireMinutes = jwt.GetValue<int?>("ExpireMinutes")
+            ?? throw new InvalidOperationException("Jwt:ExpireMinutes is not configured.");
+
+            var expiresAt = now.AddMinutes(expireMinutes);
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
