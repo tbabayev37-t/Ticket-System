@@ -1,3 +1,5 @@
+using Carter;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +8,7 @@ using Scalar.AspNetCore;
 using System.Text;
 using System.Text.Json.Serialization;
 using TicketSistemi.Context;
+using TicketSistemi.Extensions;
 using TicketSistemi.Models;
 using TicketSistemi.Services.Abstractions;
 using TicketSistemi.Services.Implementations;
@@ -48,22 +51,34 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
     });
-
+builder.Services.AddCarter();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 builder.Services.AddAuthorization();
-builder.Services.AddOpenApi();
+
+builder.Services.AddOpenApi(options =>
+
+options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 builder.Services.AddCors();
 
 
 
 var app = builder.Build();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+using (var scope = app.Services.CreateScope())
+{
+    await DbSeeder.SeedAsync(scope.ServiceProvider, app.Configuration);
+}
+
 app.UseHttpsRedirection();  //SSL helping for live
 app.UseStaticFiles();    
 app.UseCors(x => x
@@ -75,4 +90,5 @@ app.UseCors(x => x
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapCarter();
 app.Run();
