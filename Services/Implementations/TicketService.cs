@@ -108,7 +108,19 @@ namespace TicketSistemi.Services.Implementations
                 ticket.CreatedAt, ticket.ClosedAt,
                 ticket.CreatByUserId, ticket.CreatedByName, messages));
         }
-
+        public async Task<Result> DeleteAsync(Guid ticketId)
+        {
+            var ticket =  await db.Tickets.FirstOrDefaultAsync(m => m.Id == ticketId);
+            if(ticket is null)
+            {
+                return Result.NotFound("Ticket not found");
+            }
+            if (ticket.Status != TicketStatus.Closed)
+                return Result.Conflict("Only closed tickets can be deleted.");
+            db.Tickets.Remove(ticket);
+            await db.SaveChangesAsync();
+            return Result.Ok();
+        }
         public async Task<List<TicketSummaryResponse>> GetMyTicketsAsync(Guid userId, SortOrder order)
         {
             var query = db.Tickets.AsNoTracking().Where(t => t.CreatByUserId == userId);

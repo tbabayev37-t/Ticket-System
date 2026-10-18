@@ -14,6 +14,7 @@ namespace TicketSistemi.Services.Abstractions
         //admin
         Task<List<TicketSummaryResponse>> GetAllAsync(TicketStatus? status, Models.Enums.SortOrder order);
         Task<Result> CloseAsync(Guid ticketId);
+        Task<Result> DeleteAsync(Guid ticketId);
 
     }
 }

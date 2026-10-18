@@ -39,7 +39,7 @@ namespace TicketSistemi.Context
                 entity.HasOne(t => t.Author)
                 .WithMany()
                 .HasForeignKey(m => m.AuthorId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             });
         }

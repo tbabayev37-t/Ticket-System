@@ -29,6 +29,7 @@ namespace TicketSistemi.Context
         {
             var email = configuration["AdminSeed:Email"];
             var password = configuration["AdminSeed:Password"];
+            var userName = configuration["AdminSeed:UserName"] ?? "admin";
 
             // ayarlar yoxdursa admin yaradılmır
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -42,7 +43,7 @@ namespace TicketSistemi.Context
             var admin = new ApplicationUser
             {
                 FullName = "Administrator",
-                UserName = "admin",
+                UserName = userName,
                 Email = email
             };
 

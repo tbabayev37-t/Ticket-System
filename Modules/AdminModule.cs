@@ -22,6 +22,7 @@ namespace TicketSistemi.Modules
             group.MapGet("/{id:guid}", GetById);
             group.MapPost("/{id:guid}/messages", Reply);
             group.MapPost("/{id:guid}/close", Close);
+            group.MapDelete("/{id:guid}", Delete);
             
         }
         private static async Task<IResult> GetAll(ITicketService ticketService, TicketStatus? status = null,SortOrder order = SortOrder.Desc)
@@ -50,6 +51,11 @@ namespace TicketSistemi.Modules
         private static async Task<IResult> Close(Guid id, ITicketService ticketService)
         {
             var result = await ticketService.CloseAsync(id);
+            return result.Succeeded ? Results.NoContent() : result.ToProblem();
+        }
+        private static async Task<IResult> Delete(Guid id, ITicketService ticketService)
+        {
+            var result = await ticketService.DeleteAsync(id);
             return result.Succeeded ? Results.NoContent() : result.ToProblem();
         }
     }
