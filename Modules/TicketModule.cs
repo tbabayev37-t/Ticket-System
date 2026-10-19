@@ -25,36 +25,36 @@ namespace TicketSistemi.Modules
 
         }
         private static async Task<IResult> Create(CreateTicketRequest request, IValidator<CreateTicketRequest> validator
-                                                 , ClaimsPrincipal principal, ITicketService ticketService)
+                                                 , ClaimsPrincipal principal, ITicketService ticketService,CancellationToken cancellationToken)
         {
-            var validation = await validator.ValidateAsync(request);
+            var validation = await validator.ValidateAsync(request,cancellationToken);
             if (!validation.IsValid)
                 return Results.ValidationProblem(validation.ToDictionary());
-            var result = await ticketService.CreateAsync(principal.GetUserId(), request);
+            var result = await ticketService.CreateAsync(principal.GetUserId(), request,cancellationToken);
             return result.Succeeded
             ? Results.Created($"/tickets/{result.Value}", new { id = result.Value })
             : result.ToProblem();
         }
-        private static async Task<IResult> GetMy(ClaimsPrincipal principal, ITicketService ticketService, Models.Enums.SortOrder order= Models.Enums.SortOrder.Desc)
+        private static async Task<IResult> GetMy(ClaimsPrincipal principal, ITicketService ticketService, CancellationToken cancellationToken, Models.Enums.SortOrder order= Models.Enums.SortOrder.Desc)
         {
-            var list = await ticketService.GetMyTicketsAsync(principal.GetUserId(), order);
+            var list = await ticketService.GetMyTicketsAsync(principal.GetUserId(), order,cancellationToken);
             return Results.Ok(list);
         }
         private static async Task<IResult> GetById(Guid id, ClaimsPrincipal principal, 
-            ITicketService ticketService,Models.Enums.SortOrder order = Models.Enums.SortOrder.Asc)
+            ITicketService ticketService, CancellationToken cancellationToken,Models.Enums.SortOrder order = Models.Enums.SortOrder.Asc)
         {
-            var result = await ticketService.GetByIdAsync(id, principal.GetUserId(), isAdmin: false, order);
+            var result = await ticketService.GetByIdAsync(id, principal.GetUserId(), isAdmin: false, order,cancellationToken);
             return result.Succeeded ? Results.Ok(result.Value) : result.ToProblem();
         }
         private static async Task<IResult> AddMessage(Guid id, CreateMessageRequest request,
-            IValidator<CreateMessageRequest> validator,ClaimsPrincipal principal, ITicketService ticketService)
+            IValidator<CreateMessageRequest> validator,ClaimsPrincipal principal, ITicketService ticketService, CancellationToken cancellationToken)
         {
-            var validation = await validator.ValidateAsync(request);
+            var validation = await validator.ValidateAsync(request,cancellationToken);
             if (!validation.IsValid)
             {
                 return Results.ValidationProblem(validation.ToDictionary());
             }
-            var result = await ticketService.AddMessageAsync(id, principal.GetUserId(), isAdmin: false, request);
+            var result = await ticketService.AddMessageAsync(id, principal.GetUserId(), isAdmin: false, request,cancellationToken);
             return result.Succeeded ? Results.NoContent() : result.ToProblem();
         }
     }
