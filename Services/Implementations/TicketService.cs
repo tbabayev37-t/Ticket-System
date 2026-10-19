@@ -10,10 +10,10 @@ namespace TicketSistemi.Services.Implementations
 {
     public sealed class TicketService(ApplicationDbContext db) : ITicketService
     {
-        public async Task<Result> AddMessageAsync(Guid ticketId, Guid userId, bool isAdmin, CreateMessageRequest request)
+        public async Task<Result> AddMessageAsync(Guid ticketId, Guid userId, bool isAdmin, CreateMessageRequest request, CancellationToken cancellationToken = default)
         {
             var ticket = await db.Tickets.FirstOrDefaultAsync(t=>t.Id == ticketId
-                                                              && (isAdmin || t.CreatByUserId == userId));
+                                                              && (isAdmin || t.CreatByUserId == userId), cancellationToken);
             if (ticket is null)
                 return Result.NotFound("Ticket not found.");
 
@@ -31,13 +31,13 @@ namespace TicketSistemi.Services.Implementations
             {
                 ticket.Status = TicketStatus.InProgress;
             }
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
             return Result.Ok();
         }
 
-        public async Task<Result> CloseAsync(Guid ticketId)
+        public async Task<Result> CloseAsync(Guid ticketId, CancellationToken cancellationToken = default)
         {
-            var ticket = await db.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId);
+            var ticket = await db.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId,cancellationToken);
 
             if (ticket is null)
                 return Result.NotFound("Ticket not found.");
@@ -48,11 +48,11 @@ namespace TicketSistemi.Services.Implementations
             ticket.Status = TicketStatus.Closed;
             ticket.ClosedAt = DateTimeOffset.UtcNow;
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
             return Result.Ok();
         }
 
-        public async Task<Result<Guid>> CreateAsync(Guid userId, CreateTicketRequest request)
+        public async Task<Result<Guid>> CreateAsync(Guid userId, CreateTicketRequest request, CancellationToken cancellationToken = default)
         {
             var ticket = new Ticket
             {
@@ -61,21 +61,21 @@ namespace TicketSistemi.Services.Implementations
                 CreatByUserId = userId
             };
             db.Tickets.Add(ticket);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
             return Result<Guid>.Ok(ticket.Id);
         }
 
-        public async Task<List<TicketSummaryResponse>> GetAllAsync(TicketStatus? status, SortOrder order)
+        public async Task<List<TicketSummaryResponse>> GetAllAsync(TicketStatus? status, SortOrder order, CancellationToken cancellationToken = default)
         {
             var query = db.Tickets.AsNoTracking();
             if (status is not null)
             {
                 query = query.Where(t=>t.Status == status);
             }
-            return await ToSummaries(query, order).ToListAsync();
+            return await ToSummaries(query, order).ToListAsync(cancellationToken);
         }
 
-        public async Task<Result<TicketDetailResponse>> GetByIdAsync(Guid ticketId, Guid userId, bool isAdmin, SortOrder order)
+        public async Task<Result<TicketDetailResponse>> GetByIdAsync(Guid ticketId, Guid userId, bool isAdmin, SortOrder order, CancellationToken cancellationToken = default)
         {
             var ticket = await db.Tickets.AsNoTracking().Where(t => t.Id == ticketId && (isAdmin || t.CreatByUserId == userId))
                                .Select(t => new
@@ -88,7 +88,7 @@ namespace TicketSistemi.Services.Implementations
                                    t.ClosedAt,
                                    t.CreatByUserId,
                                    CreatedByName = t.CreatByUser.FullName
-                               }).FirstOrDefaultAsync();
+                               }).FirstOrDefaultAsync(cancellationToken);
 
             if (ticket is null)
                 return Result<TicketDetailResponse>.NotFound("Ticket not found.");
@@ -101,16 +101,16 @@ namespace TicketSistemi.Services.Implementations
             var messages = await messagesQuery
                 .Select(m => new TicketMessageResponse(
                     m.Id, m.Text, m.CreatedAt, m.AuthorId, m.Author.FullName))
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return Result<TicketDetailResponse>.Ok(new TicketDetailResponse(
                 ticket.Id, ticket.Title, ticket.Description, ticket.Status,
                 ticket.CreatedAt, ticket.ClosedAt,
                 ticket.CreatByUserId, ticket.CreatedByName, messages));
         }
-        public async Task<Result> DeleteAsync(Guid ticketId)
+        public async Task<Result> DeleteAsync(Guid ticketId, CancellationToken cancellationToken = default)
         {
-            var ticket =  await db.Tickets.FirstOrDefaultAsync(m => m.Id == ticketId);
+            var ticket =  await db.Tickets.FirstOrDefaultAsync(m => m.Id == ticketId, cancellationToken);
             if(ticket is null)
             {
                 return Result.NotFound("Ticket not found");
@@ -118,13 +118,13 @@ namespace TicketSistemi.Services.Implementations
             if (ticket.Status != TicketStatus.Closed)
                 return Result.Conflict("Only closed tickets can be deleted.");
             db.Tickets.Remove(ticket);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
             return Result.Ok();
         }
-        public async Task<List<TicketSummaryResponse>> GetMyTicketsAsync(Guid userId, SortOrder order)
+        public async Task<List<TicketSummaryResponse>> GetMyTicketsAsync(Guid userId, SortOrder order, CancellationToken cancellationToken = default)
         {
             var query = db.Tickets.AsNoTracking().Where(t => t.CreatByUserId == userId);
-            return await ToSummaries(query, order).ToListAsync();
+            return await ToSummaries(query, order).ToListAsync(cancellationToken);
         }
         private static IQueryable<TicketSummaryResponse> ToSummaries(IQueryable<Ticket> query, SortOrder order)
         {
