@@ -1,6 +1,5 @@
 ﻿using Carter;
 using FluentValidation;
-using Microsoft.Data.SqlClient;
 using System.Security.Claims;
 using TicketSistemi.DTOs.Tickets;
 using TicketSistemi.Extensions;
@@ -15,7 +14,7 @@ namespace TicketSistemi.Modules
         {
             var group = app.MapGroup("/tickets")
                 .WithTags("Tickets")
-                .RequireAuthorization(policy => policy.RequireRole(UserRoles.User));
+                .RequireAuthorization(policy => policy.RequireRole(UserRoles.User)).RequireRateLimiting("TicketLimiter");
 
             group.MapPost("/", Create);
             group.MapGet("/my", GetMy);

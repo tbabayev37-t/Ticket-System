@@ -9,7 +9,7 @@ namespace TicketSistemi.Modules
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("/auth").WithTags("/Auth");
+            var group = app.MapGroup("/auth").WithTags("Auth").RequireRateLimiting("FixedWindowLimiter");
             group.MapPost("/register", Register);
             group.MapPost("/login", Login);
         }
